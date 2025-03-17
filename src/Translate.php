@@ -71,6 +71,7 @@ class Translate
             if ($callbackAfterEachTranslation) {
                 $callbackAfterEachTranslation();
             }
+            sleep(1);
         }
 
         return $this->array_undot($dottedSource);
