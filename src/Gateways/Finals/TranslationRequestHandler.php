@@ -49,8 +49,10 @@ final class TranslationRequestHandler implements RequestHandlerInterface
 
     public function getBody(): array
     {
-        $salt = rand(10000, 99999);
+        $salt = $this->create_uuid();
         $curtime = strtotime("now");
+        $q = $this->translation->getText();
+        $sign = $this->calculate_sign($this->appId, $this->key, $q, $salt, $curtime);
         return [
             'form_params' => array_filter(
                 [
@@ -59,12 +61,40 @@ final class TranslationRequestHandler implements RequestHandlerInterface
                     'to'       => strtolower($this->translation->getTargetLang()),
                     'appKey'   => $this->appId,
                     'salt'     => $salt,
-                    'sign'     => hash("sha256", $this->appId . $this->truncate($this->translation->getText()) . $salt . $curtime . $this->key),
+                    'sign'     => $sign,
                     'signType' => 'v3',
                     'curtime'  => $curtime,
+                    'vocabId' => '您的用户词表ID'
+
                 ]
             )
         ];
+    }
+
+    public function create_uuid()
+    {
+        $str = md5(uniqid(mt_rand(), true));
+        $uuid = substr($str, 0, 8) . '-';
+        $uuid .= substr($str, 8, 4) . '-';
+        $uuid .= substr($str, 12, 4) . '-';
+        $uuid .= substr($str, 16, 4) . '-';
+        $uuid .= substr($str, 20, 12);
+        return $uuid;
+    }
+
+    public function calculate_sign($appKey, $appSecret, $q, $salt, $curtime)
+    {
+        $strSrc = $appKey . $this->get_input($q) . $salt . $curtime . $appSecret;
+        return hash("sha256", $strSrc);
+    }
+
+    public function get_input($q)
+    {
+        if (empty($q)) {
+            return null;
+        }
+        $len = mb_strlen($q, 'utf-8');
+        return $len <= 20 ? $q : (mb_substr($q, 0, 10) . $len . mb_substr($q, $len - 10, $len));
     }
 
     function truncate($q)
