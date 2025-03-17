@@ -53,12 +53,18 @@ final class TranslationRequestHandler implements RequestHandlerInterface
         $curtime = strtotime("now");
         $q = $this->translation->getText();
         $sign = $this->calculate_sign($this->appId, $this->key, $q, $salt, $curtime);
+        $getTargetLang = strtolower($this->translation->getTargetLang());
+
+        if($getTargetLang == 'zh_hk'){
+            $getTargetLang = 'zh-CHT';
+        }
+//        var_dump($this->translation->getTargetLang());
         return [
             'form_params' => array_filter(
                 [
                     'q'        => $this->translation->getText(),
                     'from'     => strtolower($this->translation->getSourceLang()),
-                    'to'       => strtolower($this->translation->getTargetLang()),
+                    'to'       => $getTargetLang,
                     'appKey'   => $this->appId,
                     'salt'     => $salt,
                     'sign'     => $sign,
