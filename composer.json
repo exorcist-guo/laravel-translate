@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": "^7.1 || ^8.0",
-        "oscar-team/nlaravel-langman": "1.0.1"
+        "oscar-team/laravel-langman": "1.0.1"
     },
     "require-dev": {
     },
